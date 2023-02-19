@@ -51,8 +51,11 @@ function HomePage() {
     <div>
       <h1>Email Notification Requests</h1>
       <ul>
-        {emails.map((email) => (
+        {emails.map((email:any) => (
           <li key={email._id}>
             <p>To: {email.to}</p>
             <p>Subject: {email.subject}</p>
             <p>Text: {email.text}</p>
+            </li>))}
+            </ul>
+            </div>)}
