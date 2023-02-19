@@ -1,16 +1,20 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+
+## Architecture
+
+1. Add WebSocket connections to the  client code.
+2. Backend app Send updates from the server to the client via WebSockets whenever there is a change in email delivery status.
+3. Update the Redux store and the UI in real-time based on the updates received via WebSockets.
+
 ## Getting Started
 
 First, run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

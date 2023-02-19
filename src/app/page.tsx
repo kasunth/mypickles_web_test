@@ -1,91 +1,58 @@
-import Image from 'next/image'
-import { Inter } from '@next/font/google'
-import styles from './page.module.css'
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { io } from 'socket.io-client';
+import store from '../Redux/Stores';
 
-const inter = Inter({ subsets: ['latin'] })
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
 
-export default function Home() {
+function HomePage() {
+  const dispatch = useDispatch();
+  const emails = useSelector((state) => state.emails);
+
+  useEffect(() => {
+    // Connect to the socket server
+    socket.on('connect', () => {
+      console.log('Socket connected');
+    });
+
+    // Subscribe to email updates
+    socket.on('emailUpdated', (email) => {
+      dispatch({ type: 'SET_EMAIL_DELIVERED', payload: email });
+    });
+
+    return () => {
+      // Disconnect from the socket server
+      socket.disconnect();
+    };
+  }, []);
+
+  
+  const handleAddEmail = async () => {
+    const res = await fetch('/api/webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: 'kasun@egmail.com',
+        subject: 'Test email',
+        text: 'Hello, this is a test email!',
+        html: '<p>Hello, this is a <strong>test email</strong>!</p>',
+      }),
+    });
+
+    if (res.ok) {
+      const email = await res.json();
+      dispatch({ type: 'ADD_EMAIL', payload: email });
+    } else {
+      console.error('Failed to add email');
+    }
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
-}
+    <div>
+      <h1>Email Notification Requests</h1>
+      <ul>
+        {emails.map((email) => (
+          <li key={email._id}>
+            <p>To: {email.to}</p>
+            <p>Subject: {email.subject}</p>
+            <p>Text: {email.text}</p>
