@@ -1,0 +1,2 @@
+export const ADD_EMAIL='ADD_EMAIL';
+export const GET_EMAIL_STATUS='GET_EMAIL_STATUS';
